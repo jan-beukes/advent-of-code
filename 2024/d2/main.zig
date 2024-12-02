@@ -34,17 +34,13 @@ fn isSafe(line: []i32, skipIndex: i32) bool {
     return true;
 }
 
-fn parseNums(line: []u8, alloc: mem.Allocator, comptime maxSize: i32) ![]i32 {
-    var buffer: [maxSize]i32 = undefined;
+fn parseNums(line: []u8, buff: []i32) ![]i32 {
     var tokens = mem.splitSequence(u8, line, " ");
     var count: u32 = 0;
     while (tokens.next()) |tok| : (count += 1) {
-        buffer[count] = try fmt.parseInt(i32, tok, 10);
+        buff[count] = try fmt.parseInt(i32, tok, 10);
     }
-
-    const nums: []i32 = try alloc.alloc(i32, count);
-    mem.copyForwards(i32, nums, buffer[0..count]);
-    return nums;
+    return buff[0..count];
 }
 
 pub fn main() !void {
@@ -63,8 +59,8 @@ pub fn main() !void {
         if (std.mem.eql(u8, line, "")) continue;
 
         var safe = false;
-        const slice = try parseNums(@constCast(line), alloc, 64);
-        defer alloc.free(slice);
+        var buff: [128]i32 = undefined;
+        const slice = try parseNums(@constCast(line), buff[0..]);
         // check if safe
         if (isSafe(slice, -1)) {
             safe = true;
@@ -79,11 +75,11 @@ pub fn main() !void {
         }
         if (safe) {
             safeCount += 1;
-            print("safe: {d}\n", .{slice});
+            print("safe\n", .{});
         } else {
-            print("unsafe: {d}\n", .{slice});
+            print("unsafe\n", .{});
         }
     }
 
-    print("{}\n", .{safeCount});
+    print("result: {}\n", .{safeCount});
 }
