@@ -24,18 +24,11 @@ fn parseMul(str: []const u8) ?u32 {
     return num1 * num2;
 }
 
-fn doMuls(curr: []const u8, next_do: usize) u32 {
-    var total: u32 = 0;
-    var pos: usize = 0;
-    while (mem.indexOf(u8, curr[pos..], "mul")) |i| {
-        pos += i;
-        if (pos > next_do) break;
-
-        pos += 3;
-        const add = parseMul(curr[pos..]) orelse 0;
-        total += add;
-    }
-    return total;
+fn getNext(curr: []const u8) ?[]const u8 {
+    const idx1 = mem.indexOf(u8, curr, "do") orelse std.math.maxInt(usize);
+    const idx2 = mem.indexOf(u8, curr, "mul") orelse std.math.maxInt(usize);
+    if (idx1 == idx2 and idx1 == std.math.maxInt(usize)) return null;
+    return curr[@min(idx1, idx2)..];
 }
 
 pub fn main() !void {
@@ -46,23 +39,20 @@ pub fn main() !void {
     var total = @as(u32, 0);
     var do = true;
 
-    const first = mem.indexOf(u8, curr, "do") orelse curr.len; // no more do to check
-    total += doMuls(curr, first);
-    while (mem.indexOf(u8, curr, "do")) |do_index| {
-        curr = curr[do_index..];
+    while (getNext(curr)) |slice| {
+        curr = slice;
         if (mem.startsWith(u8, curr, do_str)) {
             do = true;
-            curr = curr[do_str.len..];
+            curr = curr[1..];
         } else if (mem.startsWith(u8, curr, dont_str)) {
             do = false;
-            curr = curr[dont_str.len..];
-            continue;
+            curr = curr[1..];
+        } else if (mem.startsWith(u8, curr, "mul") and do) {
+            curr = curr[3..];
+            total += parseMul(curr) orelse 0;
         } else {
-            curr = curr[2..];
-            if (!do) continue;
+            curr = curr[1..];
         }
-        const next_do = mem.indexOf(u8, curr, "do") orelse curr.len; // no more do to check
-        total += doMuls(curr, next_do);
     }
 
     print("result: {}\n", .{total});
