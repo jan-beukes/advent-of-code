@@ -45,13 +45,14 @@ fn parseNums(line: []u8, buff: []i32) ![]i32 {
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){}; // gpa is of type GeneralPurposeAllocator()
+    defer _ = gpa.deinit();
     const alloc = gpa.allocator();
 
     const file = try std.fs.cwd().openFile("input.txt", .{});
     defer file.close();
 
     const contents = try file.readToEndAlloc(alloc, 100_000);
-    defer alloc.free(contents);
+    //defer alloc.free(contents);
 
     var lines = mem.splitSequence(u8, contents, "\n");
     var safeCount: i32 = 0;
