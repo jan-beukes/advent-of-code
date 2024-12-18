@@ -21,20 +21,20 @@ def parse_map():
 
     return map, content[1], px, py
 
-def is_valid(map, pxl, pxr, py, dy):
-    if map[py + dy][pxl] == "#" or map[py + dy][pxr] == "#": return False
+def is_valid(map, pxl, pxr, py, dx, dy):
+    if map[py + dy][pxl + dx] == "#" or map[py + dy][pxr + dx] == "#": return False
     if map[py + dy][pxl] == "]" and map[py + dy][pxr] == "[":
-        return is_valid(map, pxl - 1, pxl, py + dy, dy) and is_valid(map, pxr, pxr + 1, py + dy, dy)
+        return is_valid(map, pxl - 1, pxl, py + dy, dx, dy) and is_valid(map, pxr, pxr + 1, py + dy, dx, dy)
     elif map[py + dy][pxl] == "]":
-        return is_valid(map, pxl - 1, pxl, py + dy, dy)
+        return is_valid(map, pxl - 1, pxl, py + dy, dx, dy)
     elif map[py + dy][pxr] == "[":
-        return is_valid(map, pxr, pxr + 1, py + dy, dy)
+        return is_valid(map, pxr, pxr + 1, py + dy, dx, dy)
     if map[py + dy][pxr] == "]" or map[py + dy][pxl] == "[":
-        return is_valid(map, pxl, pxr, py + dy, dy)
+        return is_valid(map, pxl, pxr, py + dy, dx, dy)
     return True
 
 def move_block(map, pxl, pxr, py, dx, dy) -> bool:
-    if map[py + dy][pxl + dx] == "#" or map[py + dy][pxr + dx] == "#": return False
+    if not is_valid(map, pxl, pxr, py, dx, dy): return False
     if dx < 0:
         if map[py + dy][pxl + dx] == "]":
             if not move_block(map, pxl + dx - 1, pxl + dx, py + dy, dx, dy): return False
@@ -42,7 +42,6 @@ def move_block(map, pxl, pxr, py, dx, dy) -> bool:
         if map[py + dy][pxr + dx] == "[":
             if not move_block(map, pxr + dx, pxr + dx + 1, py + dy, dx, dy): return False
     else:
-        if not is_valid(map, pxl, pxr, py, dy): return False
         if map[py + dy][pxl] == "]":
             move_block(map, pxl - 1, pxl, py + dy, dx, dy)
         if map[py + dy][pxr] == "[":
