@@ -1,0 +1,139 @@
+source main
+
+#include "stdlib"
+
+procedure print_line(integer array line)
+begin
+    integer c
+    for c in line do
+        put (char)c
+    end
+    put "\n"
+end
+
+integer array function slice(integer array arr, integer start, integer count)
+begin
+    integer array new;
+    integer i;
+    new := array count;
+    i := 0;
+    while i < count do
+        new[i] := arr[start + i];
+        i := i + 1
+    end;
+
+    leave new
+end
+
+integer function readline(integer array buf)
+begin
+    integer n;
+    char c;
+
+    n := 0;
+    get c;
+    while (c <> -1) and (c <> '\n') and (n < length buf) do
+        buf[n] := c;
+        n := n + 1;
+        get c
+    end;
+
+    if c = -1 then n := -1 end;
+    leave n
+end
+
+procedure get_dimensions(integer array line, integer array out)
+begin
+    integer value, i, dim;
+    integer c;
+    value := 0;
+    dim := 0;
+    i := 0;
+    while i < length(line) do
+        if line[i] = 'x' then
+            out[dim] := value;
+            dim := dim + 1;
+            value := 0
+        elsif (line[i] >= '0') and (line[i] <= '9') then
+            value := (value * 10) + (line[i] - '0')
+        else 
+            {put "COOKED ASS LINE: \n"}
+            {call print_line(line)}
+            leave
+        end;
+        i := i + 1
+    end;
+    out[dim] := value
+end
+
+integer function min_index(integer array arr, integer exclude)
+begin
+    integer min_idx, i;
+    i := 0;
+    min_idx := i;
+    while i < length(arr) do
+        if i <> exclude then
+            if (arr[i] < arr[min_idx]) or (min_idx = exclude) then
+                min_idx := i
+            end
+        end;
+        i := i + 1
+    end;
+    leave min_idx
+end
+
+integer function calc_ribbon_len(integer array d)
+begin
+   integer i, min, min2; 
+   i := min_index(d, -1);
+   min := d[i];
+   i := min_index(d, i);
+   min2 := d[i];
+   leave (min+min + min2+min2) + d[0]*d[1]*d[2]
+end
+
+integer function calc_square_feet(integer array d)
+begin
+    integer total, area, min;
+    total := 0;
+
+    area := d[0]*d[1];
+    min := area;
+    total := total + 2*area;
+
+    area := d[0]*d[2];
+    if area < min then min := area end;
+    total := total + 2*area;
+
+    area := d[1]*d[2];
+    if area < min then min := area end;
+    total := total + 2*area;
+
+    leave total + min
+end
+
+begin
+    integer array buffer;
+    integer array line;
+    integer array dimensions;
+    integer n, total_area, total_len;
+    integer c;
+
+    buffer := array 256;
+    dimensions := array 3;
+
+    total_area := 0; total_len := 0;
+    n := readline(buffer);
+    while n <> -1 do
+        line := slice(buffer, 0, n);
+        if length(line) >= 1 then
+            call get_dimensions(line, dimensions);
+            total_area := total_area + calc_square_feet(dimensions);
+            total_len := total_len + calc_ribbon_len(dimensions);
+            n := readline(buffer)
+        end
+    end;
+
+    put "Total Area: " || total_area || "\n";
+    put "Total Ribbon Length: " || total_len || "\n"
+end
