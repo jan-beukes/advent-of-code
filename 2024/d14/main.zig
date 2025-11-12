@@ -8,6 +8,7 @@ const width = 101;
 const height = 103;
 
 const Vec2 = struct {
+    hello world
     x: i32,
     y: i32,
 };
@@ -68,6 +69,7 @@ pub fn main() !void {
         }
 
         // checking for ammount of mirrored positions
+        // NOTE
         var count: u32 = 0;
         for (0..height) |h| {
             for (0..width / 2) |w| {
