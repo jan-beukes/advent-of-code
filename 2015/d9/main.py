@@ -28,7 +28,6 @@ def make_graph(content):
             graph[right].append((left, dist))
         else:
             graph[right] = [(left, dist)]
-    print_graph(graph)
     return graph
 
 def best_path(graph, start, visited, maximum=False):
